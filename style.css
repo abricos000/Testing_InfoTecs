@@ -1,0 +1,47 @@
+.js-wrapper-item {
+    display: flex;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    position: relative;
+}
+.js-item {
+    max-width: 500px;
+    min-height: 30px;
+    width: 100%;
+    border-radius: 5px;
+    font-size: 18px;
+    color: #fff;
+    /* border: 1px solid rgb(4, 205, 205); */
+    padding: 10px;
+    box-sizing: border-box;
+    transition: .5s;
+    background: rgb(141, 103, 65);
+    text-align: center;
+    margin-top: 3px;
+    position: relative;
+}
+.js-item:hover {
+    color: rgb(4, 205, 205);
+}
+.js-item--active{
+    opacity: 0.5;
+}
+.js-wrapper-description{
+    position: relative;
+
+    color: black;
+    z-index: 1;
+    top: 3px;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+}
+.js-description {
+    position: absolute;
+    max-width: 600px;
+    width: 600px;
+    border: 2px solid rgb(89, 89, 89);
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+}
