@@ -1,47 +1,225 @@
+* {
+    box-sizing: border-box;
+    background: #e8eab2;
+  }
+
+  :root {
+    --item-width: 500px;
+    --item-height: 50px;
+    --column-width: 200px;
+  }
+
+.wrapper {
+    /* position: relative; */
+}
+.zone {
+    margin-top: 2px;
+    border-radius: 5px;
+    width: var(--item-width);
+    height: var(--item-height);
+}
 .js-wrapper-item {
     display: flex;
-    flex-wrap: wrap;
-    box-sizing: border-box;
-    position: relative;
+    
+    pointer-events: auto;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+
 }
 .js-item {
-    max-width: 500px;
-    min-height: 30px;
-    width: 100%;
+    width: var(--item-width);
+    height: var(--item-height);
     border-radius: 5px;
     font-size: 18px;
     color: #fff;
-    /* border: 1px solid rgb(4, 205, 205); */
+    border: 1px solid #000000;
     padding: 10px;
-    box-sizing: border-box;
     transition: .5s;
     background: rgb(141, 103, 65);
     text-align: center;
-    margin-top: 3px;
-    position: relative;
 }
-.js-item:hover {
-    color: rgb(4, 205, 205);
-}
-.js-item--active{
-    opacity: 0.5;
-}
+
 .js-wrapper-description{
     position: relative;
-
     color: black;
     z-index: 1;
     top: 3px;
-    left: 0;
+    left: 2px;
     opacity: 0;
     visibility: hidden;
 }
-.js-description {
+.js-popupPanel {
     position: absolute;
-    max-width: 600px;
+    background: white;
     width: 600px;
-    border: 2px solid rgb(89, 89, 89);
-    box-sizing: border-box;
+    /* border: 2px solid #595959; */
+    padding: 10px;
     top: 0;
     left: 0;
+    
+}
+.placeholder {
+    width: var(--item-width);
+    height: var(--item-height);
+}
+
+.emptySectionHiddenLesson{
+    background: none;
+    border: none;
+    width: var(--item-width);
+    height: var(--item-height);
+}
+
+
+
+
+/* 
+.js-img{
+    height: 300px;
+    width: 300px;
+} */
+
+
+.js-panel-header{
+    background: white;
+
+    display: flex;
+    text-align: center;
+    justify-content: space-between;
+}
+.js-panel-rating,
+.js-panel-title,
+.js-discount-percentage,
+.js-brand,
+.js-category,
+.js-description
+{
+    background: white;
+    text-align: left;
+
+}
+.js-discount-percentage,
+.js-brand,
+.js-category,
+.js-description
+{
+    margin-top: 10px;
+}
+
+
+.js-panel-main{
+    background: white;
+    margin-top: 30px;
+    display: flex;
+    text-align: center;
+    justify-content: space-between;
+}
+.js-panel-info{
+    background: white;
+    max-width: 200px;
+    width: 100%;
+    margin-right: 10px;
+}
+
+
+
+.js-panel-slide{
+    min-height: 300px;
+    min-width: 400px;
+    background: #e89393;
+
+    position: relative;
+
+}
+
+.js-img{
+    /* object-fit: cover; */
+
+    height: 300px;
+    width: 100%;
+    left: 0;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 1s;
+}
+.photos__inner{
+    opacity: 1;
+}
+.js-description{
+    color: #ababab;
+}
+
+
+
+.btns__img{
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 25px;
+    color: #c7c6c6;
+    opacity: .5;
+    max-height: 50px;
+    height: 100%;
+    max-width: 50px;
+    width: 100%;
+    transition: .9s;
+    outline: none;
+}
+
+.pref__img{
+    position: absolute;
+    top: 50%;
+    z-index: 20000000;
+    left: 0;
+    text-align: left;
+}
+.next__img{
+    position: absolute;
+    top: 50%;
+    z-index: 20000000;
+    right: 0;
+    text-align: right;
+}
+
+.next__img:hover,
+.pref__img:hover{
+    color: #c6c3c3;
+    opacity: 1;
+    text-shadow: #000000 1px 0 5px;
+}
+.btns button{
+    position: absolute;
+    top: 40%; 
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 30px;
+    color: var(--color-gray-400);
+    transition: .9s;
+    outline: none;
+    z-index: 2;
+    opacity: .5;
+    max-height: 150px;
+    height: 100%;
+    max-width: 150px;
+    width: 100%;
+}
+.btns button:hover{
+    color: var(--color-gray-200);
+    opacity: 1;
+    text-shadow: var(--black) 1px 0 5px;
+}
+.btns button:active{
+    color: var(--color-gray-200);
+    text-shadow: var(--black) 1px 0 5px;
+}
+.btnPref{
+    left: 0;
+    text-align: left;
+}
+.btnNext{
+    right: 0;
+    text-align: right;
 }
