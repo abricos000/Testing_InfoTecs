@@ -1,476 +1,682 @@
-let cout = 10;
+const wrapperSelector = ".wrapper";
+const listClass = 'js-list';
+const listSelector = `.${listClass}`;
+const zoneClass = "js-zone";
+const zoneSelector = `.${zoneClass}`;
+const wrapperItemClass = "js-wrapper-item";
+const wrapperItemSelect = `.${wrapperItemClass}`;
+const itemClass = "js-item";
+const wrapperPopupClass = "js-wrapper-popup";
+const panelPopupClass = "js-popup-panel";
+const panelPopupSelector = `.${panelPopupClass}`;
+const panelHeaderClass = "js-panel-header";
+const panelTitleClass = "js-panel-title";
+const panelRatingClass = "js-panel-rating";
+const panelMainClass = "js-panel-main";
+const panelInfoClass = "js-panel-info";
+const panelDiscountPercentageClass = "js-discount-percentage";
+const panelBrandClass = 'js-brand';
+const panelCategpryClass = "js-category";
+const panelDescriptionClass = "js-description";
+const panelSlideClass = "js-panel-slide";
+const panelImgClass = "js-img";
+
+const wrapperBtnsClass = "js-btn-wrapper";
+const wrapperBtnsSelector = `.${wrapperBtnsClass}`;
+const prevListClass = "js-prev-list";
+const prevNextClass = "js-next-list";
+const inactiveBtnClass = "js-inactive-button";
+const optionClass = "js-option";
+const wrapperSelectInputClass = "js-wrapper-select-input";
+const selectClass = "js-select";
+const inputClass = "js-input";
+
+const emptySectionHiddenLessonClass = "js-empty-section-hidden-lesson";
+const emptySectionHiddenLessonSelector = `.${emptySectionHiddenLessonClass}`;
+const placeholderClass = "js-placeholder";
+const pointerEventsClass = "js-pointer-events";
+const itemActiveClass = "js-item-active";
+
+const JsonPlaceholder = "https://dummyjson.com/products";
+
+const select = [
+  {value: "category", text: "category"},
+  {value: "title", text: "title"},
+  {value: "price", text: "price"},
+  {value: "rating", text: "rating"},
+];
+
 let currentData = null;
-let numberCurrentList = 0;
-
-const active = {
-  opacity: '1',
-  visibility: 'visible',
-  height: '50px',
-  marginTop: '2px',
-}
-const inactive = {
-  opacity: '0',
-  visibility: 'hidden',
-  height: '0',
-  marginTop: '0',
-}
-
-const wrapper = "wrapper"
-const list = 'js-list'
-const zoneItem = "zone"
-const wrapperItemSelect = "js-wrapper-item"
-const item = "js-item"
-const wrapperPopup = "js-wrapper-popup"
-const panelPopup = 'js-popup__panel'
-const panelHeader = "js-panel-header"
-const panelTitle = "js-panel-title"
-const panelRating = "js-panel-rating"
-const panelMain = "js-panel-main"
-const panelInfo = "js-panel-info"
-const panelDiscountPercentage = "js-discount-percentage"
-const panelBrand = 'js-brand'
-const panelCategpry = "js-category"
-const panelDescription = "js-description"
-const panelSlide = "js-panel-slide"
-const panelImg = "js-img"
-const panelBtnsImg = "btns__img"
-const panelBtnPrev = "prev__img"
-const panelBtnNext = "next__img"
-
-const wrapperBtns = "js-btn-wrapper"
-const prevList = "js-prev__list"
-const prevNext = "js-next__list"
-const inactiveBtn = 'js-inactive__button'
-
-const sectionHiddenLesson = "emptySectionHiddenLesson"
-const placeholderSelect = "placeholder"
-
-let currentDroppable = null;
-let placeholder = null;
-let isDraggingStarted = false;
-let movingElement = null;
-let elementBelow = null;
-
-const shifts = {
-  shiftX: 0,
-  shiftY: 0,
-  set: (clientX, clientY, movingElement) => {
-    shifts.shiftX = clientX - movingElement.getBoundingClientRect().left;
-    shifts.shiftY = clientY - movingElement.getBoundingClientRect().top;
-  },
-};
-
-const initialMovingElementPageXY = {
-  x: 0,
-  y: 0,
-  set: (movingElement) => {
-    const rect = movingElement.getBoundingClientRect();
-    initialMovingElementPageXY.x = rect.x + window.scrollX;
-    initialMovingElementPageXY.y = rect.y + window.scrollY;
-  },
-};
 
 
 /**
- * Класс для создания елемента спискa 
+ * класс для инициализации всей страницы
+ */
+class Page {
+
+  /**
+   * конструктор класса Page
+   * @constructor 
+   */
+  constructor() {
+    this.count = 10;
+    this.numberCurrentList = 0;
+    this.items = [];
+    this.firstIndexCurrentList = 0
+
+    this._handleGetData(JsonPlaceholder)
+    this._init()
+  }
+
+  /**
+   * метод инициализации страницы 
+   */  
+  _init = () => {
+    const wrapperSelectInputElement = document.createElement('div');
+    wrapperSelectInputElement.className = wrapperSelectInputClass;
+    document.querySelector(wrapperSelector).append(wrapperSelectInputElement);
+
+    const inputElement = document.createElement('input');
+    inputElement.className = inputClass;
+    inputElement.value = this.count;
+    wrapperSelectInputElement.append(inputElement);
+
+    const selectElement = document.createElement('select');
+    selectElement.className = selectClass;
+    wrapperSelectInputElement.append(selectElement);
+
+    const optionDefaultElement = document.createElement('option');
+    selectElement.append(optionDefaultElement);
+
+    select.forEach(el => {
+      const optionElement = document.createElement('option');
+      optionElement.className = optionClass;
+      optionElement.value = el.value;
+      optionElement.textContent = el.text;
+      selectElement.append(optionElement);
+    })
+
+    const btnsWrapperElement = document.createElement('div');
+    btnsWrapperElement.className = wrapperBtnsClass;
+    document.querySelector(wrapperSelector).append(btnsWrapperElement);
+  
+    const btnPrevElement = document.createElement('button');
+    btnPrevElement.className = prevListClass;
+    btnPrevElement.classList.add(inactiveBtnClass);
+    btnPrevElement.textContent = 'prev';
+    btnsWrapperElement.append(btnPrevElement);
+  
+    const btnNextElement = document.createElement('button');
+    btnNextElement.className = prevNextClass;
+    btnNextElement.textContent = 'next';
+    btnsWrapperElement.append(btnNextElement);
+
+    this._initListeners(btnPrevElement, btnNextElement, inputElement, selectElement);
+  }
+
+  /**
+   * метод добавления обработчиков событий 
+   * @param {HTMLElement} btnPrevElement - кнопка Prev
+   * @param {HTMLElement} btnNextElement - кнопка Next
+   * @param {HTMLElement} inputElement - поле для ввода количесва выводимых элементов списка
+   * @param {HTMLElement} selectElement - селект для сортировки массива
+   */  
+  _initListeners = (btnPrevElement, btnNextElement, inputElement, selectElement) => {
+
+    btnNextElement.addEventListener('click', () => {
+      const coutList= Math.ceil(currentData?.length/this.count); 
+      btnPrevElement.classList.remove(inactiveBtnClass);
+
+      if (coutList - 1 > this.numberCurrentList) {
+        ++this.numberCurrentList;
+        this.firstIndexCurrentList = this.count * this.numberCurrentList;
+        let endPosition = this.firstIndexCurrentList + this.count;
+        const currentListElement = currentData.slice(this.firstIndexCurrentList, endPosition);
+        this._addData(currentListElement);
+      };
+
+      if (this.numberCurrentList === coutList - 1 ) {
+        btnNextElement.classList.add(inactiveBtnClass);
+      };
+    })
+
+    btnPrevElement.addEventListener('click', () => {
+      btnNextElement.classList.remove(inactiveBtnClass);
+
+      if (!(this.numberCurrentList-1)) {
+        btnPrevElement.classList.add(inactiveBtnClass);
+      };
+
+      if (this.numberCurrentList) {
+        let endPosition = this.count * this.numberCurrentList;
+        this.firstIndexCurrentList = endPosition - this.count;
+        const currentListElement = currentData.slice(this.firstIndexCurrentList, endPosition);
+        this._addData(currentListElement);
+        this.numberCurrentList--;
+      };
+    });
+
+    inputElement.addEventListener('blur', () => {
+      const num = Number(inputElement.value);
+
+      if (Number.isInteger(num) && num > 0) {
+        this.count = num;
+        const currentListElement = currentData.slice(0, this.count);
+        this._addData(currentListElement);
+      } else {
+        inputElement.value = this.count;
+      };
+    });
+
+    inputElement.addEventListener('keydown', (event) => {
+
+      if (event.key === 'Enter') {
+        const num = Number(inputElement.value);
+
+        if (Number.isInteger(num) && num > 0) {
+          this.count = num;
+          const currentListElement = currentData.slice(0, this.count);
+          this._addData(currentListElement);
+        } else {
+          inputElement.value = this.count;
+        };
+      };
+    });
+
+    selectElement.addEventListener('click', (event) => {
+      const newPosts = [...currentData]; 
+
+      if (typeof newPosts[0][`${event.target.value}`] === 'string') {
+        newPosts.sort((a, b) => (a[event.target.value]).localeCompare(b[event.target.value]));
+      }     
+
+      if (typeof newPosts[0][`${event.target.value}`] === 'number') {
+        newPosts.sort((a, b) => {
+          if (a[event.target.value] > b[event.target.value]) {
+            return -1;
+          } else {
+            return b[event.target.value] > a[event.target.value] ? 1 : 0;
+          };
+        });
+      };
+      currentData = newPosts;
+      const currentListElement = currentData.slice(0, this.count);
+      this._addData(currentListElement);
+    })
+  };
+
+  /**
+   * метод создания элементов списка 
+   * @param {object[]} data - массив текущий объктов которые будут преобразоваться в html элементы
+   */
+  _addData = (data) => {
+    // по всем зонам нужно проходить и удалять каждую. Метод внутри зоны должен удалять себя же и обработчики которые были созданы
+    const deleteElements = document.querySelectorAll(zoneSelector);
+    deleteElements.forEach(deleteElement => {
+      deleteElement.remove();
+    });
+    // this.items = [];
+    // const listElement = document.createElement('div')
+    // listElement.classList.add(listClass)
+    // document.querySelector(wrapperSelector).append(listElement)
+
+
+    if (this.count >= currentData.length) {
+      document.querySelector(wrapperBtnsSelector).style.opacity = '0';
+      document.querySelector(wrapperBtnsSelector).style.cursor = 'none';
+    } else {
+      document.querySelector(wrapperBtnsSelector).style.opacity = '1';
+      document.querySelector(wrapperBtnsSelector).style.cursor = 'pointer';
+    };
+
+    data.forEach(el => {
+      this.items.push(new Item(el, this.count, this.firstIndexCurrentList, currentData));
+    });
+  };
+
+  /**
+   * метод создания списка 
+   * @param {object[]} responseJSON - ответ с сервера
+   */
+  _addDataAll = (responseJSON) => {
+    currentData = [...responseJSON];
+    const listElement = document.createElement('div');
+    listElement.classList.add(listClass);
+    document.querySelector(wrapperSelector).append(listElement);
+
+    const currentListElement = currentData.slice(0, this.count);
+    this._addData(currentListElement);
+  };
+
+  /**
+   * асинхронный метод обрабатывающий ответ с сервера
+   * @param {string} url - ссылка
+   */
+  _handleGetData = async(url) => {
+    try {
+        const res = await fetch(url);
+        const responseJSON = await res.json();
+        this._addDataAll(responseJSON.products);
+    } catch (error) {
+        console.log(error);
+    };
+  };
+};
+
+new Page();
+
+
+/**
+ * Класс для создания элемента спискa 
  */
 class Item {
-  /**
-  * метод инициализации компонента
-  * @param {element} itemElement Объект
-  */
-  init = (itemElement, index) => { 
-    try{
-      let zone = document.createElement('div');
-      zone.classList.add(zoneItem);
-      zone.draggable = "true"
-      if (index < cout) {
-        Object.assign(zone.style, active)
-      } else {
-        Object.assign(zone.style, inactive)
-      }
-      document.querySelector(`.${list}`).append(zone)
-        
-      let wrapperItem = document.createElement('div');
-      wrapperItem.classList.add(wrapperItemSelect);
-      zone.append(wrapperItem);
-        
-      let itemBlock = document.createElement('div');
-      itemBlock.classList.add(item);
-      itemBlock.innerHTML = `${itemElement.title}`;
-      wrapperItem.append(itemBlock);
-        
-      let wrapperDescription = document.createElement('div');
-      wrapperDescription.classList.add(wrapperPopup);
-      wrapperItem.append(wrapperDescription);
-        
-      let description = this._handlePopupPanel(itemElement)
-      wrapperDescription.append(description)
 
-      this._handleMouseDown(zone)
-    } catch (Err) {
-      console.error(Err) 
-    }        
-  }
   /**
-  * Метод добавления событий на элемент списка
-  * @param {element} zone DOM элемент, на котором будут отлавливаться события 
-  */
-  _handleMouseDown = (zone) => {
-    let tooltip = zone.querySelector(`.${wrapperPopup}`)
-    let hover = zone.querySelector(`.${item}`)
-    zone.onmouseover = function() {
-      hover.style.background = '#d8a470'
-      this.style.cursor = 'pointer'
-      tooltip.style.opacity = '1'
-      tooltip.style.visibility = 'visible'
-      this.querySelector(`.${wrapperItemSelect}`).style.pointerEvents = 'none'///////////////////////////
-    }
+   * @constructor 
+   * @param {object} itemData - объект
+   * @param {object[]} numberCurrentList - текущий массив объектов для инициализации
+   * @param {number} firstIndexCurrentList - порядковый номер первого елемента текущего массива из общих данных
+   */
+  constructor (itemData, numberCurrentList, firstIndexCurrentList) {
 
-    zone.onmouseout = function() {
-      if (this.querySelector(`.${wrapperItemSelect}`).style.pointerEvents === 'none') {
-        this.querySelector(`.${wrapperItemSelect}`).style.pointerEvents = 'auto'
-        hover.style.background = '#8d6741'
-        tooltip.style.opacity = '0'
-        tooltip.style.visibility = 'hidden'
-      }
-    }
-    zone.onmousedown = this._onMouseDown;
-    zone.ondragstart = () => {
-      return false;
+    this.firstIndexCurrentList = firstIndexCurrentList;
+    this.statusPopup = false;
+    this.numberCurrentList = numberCurrentList;
+    this.itemData = itemData;
+    this.isDraggingStarted = false;
+    this.currentDroppable = null;
+    this.placeholder = null;
+    this.movingElement = null;
+    this.elementBelow = null;
+    this.element = null;
+    this.item =null;
+    this.wrapperPopupElement = null;
+
+    this.shifts = {
+      shiftX: 0,
+      shiftY: 0,
+      set (clientX, clientY, movingElement) {
+        const rect = movingElement.getBoundingClientRect();
+        this.shiftX = clientX - rect.left;
+        this.shiftY = clientY - rect.top;
+      },
     };
-  }
+
+    this.initialMovingElementPageXY = {
+      x: 0,
+      y: 0,
+      set (movingElement) {
+        const rect = movingElement.getBoundingClientRect();
+        this.x = rect.x + window.scrollX;
+        this.y = rect.y + window.scrollY;
+      },
+    };
+
+    this._init();
+}
+  /**
+  * метод инициализации элемента массива
+  */
+  _init = () => {
+    try{
+      const zoneElement = document.createElement('div');
+      zoneElement.classList.add(zoneClass);
+      zoneElement.id = this.itemData.id;
+      this.element = zoneElement;
+
+      const wrapperItemElement = document.createElement('div');
+      wrapperItemElement.classList.add(wrapperItemClass);
+      zoneElement.append(wrapperItemElement);
+        
+      const itemElement = document.createElement('div');
+      itemElement.classList.add(itemClass);
+      itemElement.textContent = this.itemData.title;
+      wrapperItemElement.append(itemElement);
+      this.item = itemElement;
+        
+      const wrapperPopupElement = document.createElement('div');
+      wrapperPopupElement.classList.add(wrapperPopupClass);
+      wrapperItemElement.append(wrapperPopupElement);
+      this.wrapperPopupElement = wrapperPopupElement;
+
+      this._initListeners();
+
+      if (document.querySelector(listSelector)) {
+        document.querySelector(listSelector).append(zoneElement);
+      }
+
+    } catch (Err) {
+      console.error(Err);
+    }        
+  };
+
+  /**
+   * Метод добавления событий на элемент списка
+   */
+  _initListeners = () => {
+    this.element.addEventListener('mouseover', this._onMouseOver );
+    this.element.addEventListener('mouseout', this._onMouseOut);
+    this.element.addEventListener('mousedown', this._onMouseDown);
+    this.element.addEventListener("mousemove", this._onZoneMouseMove);
+  };
+
+  /**
+   * Метод добавления всплывающего окна и активного цвета элементу списка
+   */
+  _onZoneMouseMove = () => {
+         
+    if (!this.isDraggingStarted && !this.element.querySelector(panelPopupSelector)){
+      const itemPopup = new Popup(this.itemData);
+      this.wrapperPopupElement.append(itemPopup._init());
+      this.item.classList.add(itemActiveClass);
+    }
+  };
+
+  /**
+   * Метод удаления всплывающего окна и активного цвета элементу списка
+   */
+  _onMouseOut = () => {
+
+    if (this.element.querySelector(panelPopupSelector)) {
+      this.element.querySelector(panelPopupSelector).remove();
+    };
+    
+    this.item.classList.remove(itemActiveClass);
+    this.element.querySelector(wrapperItemSelect).classList?.remove(pointerEventsClass);
+  };
+
+  _onMouseOver = () => {
+         
+    if (!this.isDraggingStarted && !this.element.querySelector(panelPopupSelector)){
+      this.element.querySelector(wrapperItemSelect).classList.add(pointerEventsClass);
+    }
+  };
 
   _onMouseDown = (event) => {
-    movingElement = event.target;
-    shifts.set(event.clientX, event.clientY, movingElement);
-    initialMovingElementPageXY.set(movingElement);
-    document.addEventListener("mousemove", this._onMouseMove);
-    movingElement.onmouseup = this._onMouseUp
-  }
+    this.movingElement = event.target;
+    this.shifts.set(event.clientX, event.clientY, this.movingElement);
+    this.initialMovingElementPageXY.set(this.movingElement);
 
+    document.addEventListener("mousemove", this._onMouseMove);
+
+    this.movingElement.addEventListener('mouseup', this._onMouseUp);
+  };
+
+  /**
+   *  метод метод изменения массива после drag and drop
+   */ 
+  _changeCurrentArray = () => {
+    const zoneElements = Object.values(document.querySelectorAll(zoneSelector));
+    const indexElement = zoneElements.findIndex(el => el.id === this.movingElement.id);
+    const curentElement = currentData.find(el => el.id == this.movingElement.id);
+    const newArray = currentData.filter(item => !(item.id == this.movingElement.id));
+    const indexNewPosition = this.firstIndexCurrentList + indexElement;
+
+    const newArr = newArray.reduce((pref, el, index) => {
+
+      if( index === indexNewPosition) {
+          pref.push(curentElement);
+        }
+        pref.push(el);
+      return pref;
+    }, []);
+
+    if( newArray.length === indexNewPosition ) {
+      newArr.push(curentElement);
+    }
+
+    currentData = [...newArr];
+  };
+
+  /**
+   *  метод срабатывающий при mouse up
+   */ 
   _onMouseUp = () => {//срабатыввет когда отпускаю мышь
-    if (!isDraggingStarted) {
+    
+    if (!this.isDraggingStarted) {
       document.removeEventListener("mousemove", this._onMouseMove);
-      movingElement.onmouseup = null;
       return;
     }
-    placeholder.parentNode.insertBefore(movingElement, placeholder);
-    Object.assign(movingElement.style, {
+    this.placeholder.parentNode.insertBefore(this.movingElement, this.placeholder);
+
+    Object.assign(this.movingElement.style, {
       position: "static",
       left: "auto",
       top: "auto",
       zIndex: "auto",
       transform: "none",
     });
+
     document.removeEventListener("mousemove", this._onMouseMove);
-    isDraggingStarted = false;
-    placeholder && placeholder.parentNode.removeChild(placeholder);
-    movingElement.onmouseup = null;
-    movingElement = null;
+    this.isDraggingStarted = false;
+    this.placeholder && this.placeholder.parentNode.removeChild(this.placeholder);
+    this.movingElement.onmouseup = null;
     this._processEmptySections();
+    this._changeCurrentArray();
+    this.movingElement = null;
   };
 
   _processEmptySections = () => {
-    document.querySelectorAll(`.${list}`).forEach((section) => {
-        if (!section.querySelector(`.${zoneItem}:not(.${sectionHiddenLesson})`)) {
-          const emptySectionHiddenLesson = document.createElement("div");
-          emptySectionHiddenLesson.classList.add(
-            zoneItem,
-            emptySectionHiddenLesson
-          );
-          section.append(emptySectionHiddenLesson);
-        } else {
-          const emptySectionHiddenLesson = section.querySelector(
-            `.${sectionHiddenLesson}`
-          );
-          emptySectionHiddenLesson &&
-            section.removeChild(emptySectionHiddenLesson);
-        }
-      });
+    document.querySelectorAll(listSelector).forEach(section => {
+
+      if (!section.querySelector(`${zoneSelector}:not(${emptySectionHiddenLessonSelector})`)) {
+        const emptySectionHiddenLesson = document.createElement("div");
+
+        emptySectionHiddenLesson.classList.add(zoneClass, emptySectionHiddenLesson);
+        section.append(emptySectionHiddenLesson);
+      } else {
+        const emptySectionHiddenLesson = section.querySelector(emptySectionHiddenLessonSelector);
+        emptySectionHiddenLesson && section.removeChild(emptySectionHiddenLesson);
+      }
+    });
   };
 
+// посмотреть про тротлинг, в последний момент, не забыть
   _onMouseMove = (event) => {// срабытывает когда идет перетаскивание
-    if (!isDraggingStarted) {
-        let tooltip = movingElement.querySelector(`.${wrapperPopup}`)
-        tooltip.style.opacity = '0'
-        tooltip.style.visibility = 'hidden'
-      isDraggingStarted = true;
+
+    if (!this.isDraggingStarted) {
+
+      if (this.movingElement.querySelector(panelPopupSelector)) {
+        this.movingElement.querySelector(panelPopupSelector).remove()
+      }
+      this.isDraggingStarted = true;
       this._createPlaceholder();
-      Object.assign(movingElement.style, {
+
+      Object.assign(this.movingElement.style, {
         position: "absolute",
         zIndex: 10000,
-        left: `${initialMovingElementPageXY.x}px`,
-        top: `${initialMovingElementPageXY.y}px`,
+        left: `${this.initialMovingElementPageXY.x}px`,
+        top: `${this.initialMovingElementPageXY.y}px`,
       });
     }
-    this._moveAt(movingElement, event.pageX, event.pageY);
-    elementBelow = this._getElementBelow(movingElement, "by-center");
-    if (!elementBelow) return;
-    let droppableBelow = elementBelow.closest(`.${zoneItem}`);
-    if (currentDroppable !== droppableBelow) {
-      currentDroppable = droppableBelow;
-      if (currentDroppable) {
-        if (!this._isAbove(movingElement, currentDroppable) ||
-          currentDroppable.classList.contains(sectionHiddenLesson)
-        ) {
-          currentDroppable.parentNode.insertBefore(
-            placeholder,
-            currentDroppable
-          );
-        } else {
-          currentDroppable.parentNode.insertBefore(
-            placeholder,
-            currentDroppable.nextElementSibling
-          );
-        }
+
+    this._moveAt(this.movingElement, event.pageX, event.pageY);
+    this.elementBelow = this._getElementBelow(this.movingElement, "by-center");
+
+    if (!this.elementBelow) return;
+
+    const droppableBelow = this.elementBelow.closest(zoneSelector);
+    this.currentDroppable = droppableBelow;
+
+    if (this.currentDroppable) {
+
+      if (!this._isAbove(this.movingElement, this.currentDroppable) ||
+      this.currentDroppable.classList.contains(emptySectionHiddenLessonClass)
+      ) {
+        this.currentDroppable.parentNode.insertBefore(
+          this.placeholder,
+          this.currentDroppable
+        );
+      } else {
+        this.currentDroppable.parentNode.insertBefore(
+          this.placeholder,
+          this.currentDroppable.nextElementSibling
+        );
       }
     }
   };
 
+  /**
+   *  метод создания placeholder
+   */ 
   _createPlaceholder = () => {
-    placeholder = document.createElement("div");
-    placeholder.classList.add(placeholderSelect);
-    movingElement.parentNode.insertBefore(placeholder, movingElement);
+    this.placeholder = document.createElement("div");
+    this.placeholder.classList.add(placeholderClass);
+    
+    if (this.movingElement.parentNode) {
+      this.movingElement.parentNode.insertBefore(this.placeholder, this.movingElement);
+    }
   };
 
   _getElementBelow = (movingElement, searchCoordsBy) => {
+
     const movingElementCenter = this._getElementCoordinates(
       movingElement,
       searchCoordsBy
     );
     movingElement.hidden = true;
-     elementBelow = document.elementFromPoint(
+
+    this.elementBelow = document.elementFromPoint(
       movingElementCenter.left,
       movingElementCenter.top
     );
+
     movingElement.hidden = false;
-    return elementBelow;
+
+    return this.elementBelow;
   };
 
   _moveAt = (element, pageX, pageY) => {
     element.style.transform = `translate(${
-      pageX - initialMovingElementPageXY.x - shifts.shiftX
+      pageX - this.initialMovingElementPageXY.x - this.shifts.shiftX
     }px, ${
-      pageY - initialMovingElementPageXY.y - shifts.shiftY
+      pageY - this.initialMovingElementPageXY.y - this.shifts.shiftY
     }px) rotate(-3deg)`;
   };
-  
+
   _getElementCoordinates = (node, searchCoordsBy) => {
     const rect = node.getBoundingClientRect();
+
     return {
-      top:
-        searchCoordsBy === "by-center"
-          ? rect.top + rect.height / 2
-          : rect.top + 10,
+      top: searchCoordsBy === "by-center" ? rect.top + rect.height / 2 : rect.top + 10,
       left: rect.left + rect.width / 2,
     };
   };
-  
+
   _isAbove = (nodeA, nodeB) => {
     const rectA = nodeA.getBoundingClientRect();
     const rectB = nodeB.getBoundingClientRect();
     return rectA.top + rectA.height / 2 < rectB.top + rectB.height / 2;
   };
+
   /**
-  * Метод создания всплывающей панели
-  * @param {element} itemElement Объект
-  */
-  _handlePopupPanel(itemElement) {
+   *  метод удаления самого экзепляра класса
+   */ 
+  _remove() {
+    this.element.remove();
+    this._removeListeners();
+  };
 
-    let popup = document.createElement('div');
-    popup.classList.add(panelPopup);
-
-    let header = document.createElement('div');
-    header.classList.add(panelHeader);
-    popup.append(header);
-
-    let title = document.createElement('div');
-    title.classList.add(panelTitle);
-    title.innerHTML = `${itemElement.title}`;
-    header.append(title);
-
-    let rating = document.createElement('div');
-    rating.classList.add(panelRating);
-    rating.innerHTML = `rating: <strong>${itemElement.rating}</strong> / 5 &#10026;`;
-    header.append(rating);
-
-    let main = document.createElement('div');
-    main.classList.add(panelMain);
-    popup.append(main);
-
-    let info = document.createElement('div');
-    info.classList.add(panelInfo);
-    main.append(info);
-
-    let discountPercentage = document.createElement('div');
-    discountPercentage.classList.add(panelDiscountPercentage);
-    discountPercentage.innerHTML = `скидка: <strong>${itemElement.discountPercentage} &#37;</strong>`;
-    info.append(discountPercentage);
-
-    let price = document.createElement('div');
-    price.classList.add(panelDiscountPercentage);
-    price.innerHTML = `price: <strong>${itemElement.price} &#36;</strong>`;
-    info.append(price);
-
-    let brand = document.createElement('div');
-    brand.classList.add(panelBrand);
-    brand.innerHTML = `brand: <strong>${itemElement.brand}</strong>`;
-    info.append(brand);
-
-    let category = document.createElement('div');
-    category.classList.add(panelCategpry);
-    category.innerHTML = `category: <strong>${itemElement.category}</strong>`;
-    info.append(category);
-
-    let description = document.createElement('div');
-    description.classList.add(panelDescription);
-    description.innerHTML = `${itemElement.description}`;
-    info.append(description);
-
-    let slide = document.createElement('div');
-    slide.classList.add(panelSlide);
-    main.append(slide);
-
-    itemElement.images.forEach((el, index) => {
-      let image = document.createElement('img');
-      image.classList.add(panelImg);
-      image.src = el
-      image.loading = "lazy"
-      if (!index) {
-        image.classList.add("photos__inner");
-      }
-      slide.append(image);
-    })
-
-    let btnPrev = document.createElement('button');
-    btnPrev.className = panelBtnPrev
-    btnPrev.classList.add(panelBtnsImg);
-    btnPrev.innerHTML = `&#10094;`;
-    slide.append(btnPrev);
-
-
-    let btnNext = document.createElement('button');
-    btnNext.className = panelBtnNext
-    btnNext.classList.add(panelBtnsImg);
-    btnNext.innerHTML = `&#10095;`;
-    slide.append(btnNext);
-
-      // let imgArray = images.querySelectorAll(panelImg);
-      // let i = 0;
-
-      // btnNext.addEventListener('click', () => {
-      //   imgArray[i].className = '';
-      //   i++;
-      //   if ( i >= imgArray.length){
-      //     i = 0;
-      //   }
-      //   imgArray[i].className = 'photos__inner';
-      // })
-
-      // btnPrev.addEventListener('click', () => {
-      //   imgArray[i].className = '';
-      //     i--;
-      //     if ( i < 0){
-      //       i = imgArray.length - 1;
-      //     }
-      //     imgArray[i].className = 'photos__inner';
-      // })
-    return popup;
-  }
+  /**
+   *  метод отписка от всех событий
+   */ 
+  _removeListeners() {
+    document.removeEventListener("mousemove", this._onMouseMove);
+    this.movingElement.removeEventListener('mouseup', this._onMouseUp);
+    this.element.removeEventListener('mouseover', this._onMouseOver);
+    this.element.removeEventListener('mouseout', this._onMouseOut);
+    this.element.removeEventListener('mousedown', this._onMouseDown);
+    this.element.removeEventListener("mousemove", this._onZoneMouseMove);
+  };
 }
 
 
+/**
+ * Класс для создания всплывающей панели элемента спискa 
+ */ 
+class Popup {
 
-let btnWrapper = document.createElement('div');
-btnWrapper.className = wrapperBtns
-document.querySelector(`.${wrapper}`).append(btnWrapper);
+  /**
+   * конструктор класса для создания всплывающей панели элемента спискa 
+   * @constructor
+   * @param {object} itemData Объект 
+   */
+  constructor (itemData) {
+    this.itemData = itemData;
+  };
 
-let btnPrev = document.createElement('button');
-btnPrev.className = prevList
-btnPrev.classList.add(inactiveBtn) 
-btnPrev.innerHTML = `prev`;
-btnWrapper.append(btnPrev);
+/**
+ * метод инициализации всплывающей панели 
+ * @returns {HTMLElement}  
+ */ 
+  _init = () => {
+    const popupElement = document.createElement('div');
+    popupElement.classList.add(panelPopupClass);
 
-let btnNext = document.createElement('button');
-btnNext.className = prevNext
-btnNext.innerHTML = `next`;
-btnWrapper.append(btnNext);
+    const headerElement = document.createElement('div');
+    headerElement.classList.add(panelHeaderClass);
+    popupElement.append(headerElement);
 
+    const titleElement = document.createElement('div');
+    titleElement.classList.add(panelTitleClass);
+    titleElement.textContent = this.itemData.title;
+    headerElement.append(titleElement);
 
-btnNext.addEventListener('click', () => {
-  const zone2 = document.querySelectorAll(`.${zoneItem}`)
-  btnPrev.classList.remove(inactiveBtn)
-  let coutList= Math.ceil(currentData?.length/cout) 
-  if (coutList - 1 > numberCurrentList) {
-    ++numberCurrentList;
-    let startPosition = cout*numberCurrentList;
-    let endPosition = startPosition + cout
-    zone2.forEach((el, index) => {
-      if ((startPosition <= index) && (index < endPosition)) {
-        Object.assign(el.style, active)
-      } else {
-        Object.assign(el.style, inactive)
-      }
-    })
+    const ratingElement = document.createElement('div');
+    ratingElement.classList.add(panelRatingClass);
+    ratingElement.innerHTML = `rating: <strong>${this.itemData.rating}</strong> / 5 &#10026;`;
+    headerElement.append(ratingElement);
+
+    const mainElement = document.createElement('div');
+    mainElement.classList.add(panelMainClass);
+    popupElement.append(mainElement);
+
+    const infoElement = document.createElement('div');
+    infoElement.classList.add(panelInfoClass);
+    mainElement.append(infoElement);
+
+    const discountPercentageElement = document.createElement('div');
+    discountPercentageElement.classList.add(panelDiscountPercentageClass);
+
+    discountPercentageElement.innerHTML = 
+      `discount: <strong>
+        ${this.itemData.discountPercentage}&#37;
+      </strong>`;
+
+    infoElement.append(discountPercentageElement);
+
+    const priceElement = document.createElement('div');
+    priceElement.classList.add(panelDiscountPercentageClass);
+    priceElement.innerHTML = `price: <strong>${this.itemData.price} &#36;</strong>`;
+    infoElement.append(priceElement);
+
+    const brandElement = document.createElement('div');
+    brandElement.classList.add(panelBrandClass);
+    brandElement.innerHTML = `brand: <strong>${this.itemData.brand}</strong>`;
+    infoElement.append(brandElement);
+
+    const categoryElement = document.createElement('div');
+    categoryElement.classList.add(panelCategpryClass);
+    categoryElement.innerHTML = `category: <strong>${this.itemData.category}</strong>`;
+    infoElement.append(categoryElement);
+
+    const descriptionElement = document.createElement('div');
+    descriptionElement.classList.add(panelDescriptionClass);
+    descriptionElement.textContent = this.itemData.description;
+    infoElement.append(descriptionElement);
+
+    const slideElement = document.createElement('div');
+    slideElement.classList.add(panelSlideClass);
+    mainElement.append(slideElement);
+
+    const imageElement = document.createElement('img');
+    imageElement.classList.add(panelImgClass);
+    imageElement.src = this.itemData.thumbnail;
+    slideElement.append(imageElement);
+
+    return popupElement;
   }
-  if (numberCurrentList === coutList - 1) {
-    btnNext.classList.add(inactiveBtn)
-  }
-})
-
-btnPrev.addEventListener('click', () => {
-  const zone2 = document.querySelectorAll(`.${zoneItem}`)
-  btnNext.classList.remove(inactiveBtn)
-  if (!(numberCurrentList-1)) {
-    btnPrev.classList.add(inactiveBtn)
-  }
-  if (numberCurrentList) {
-    let startPosition = cout*numberCurrentList;
-    let endPosition = startPosition - cout
-    zone2.forEach((el, index) => {
-      if ((endPosition <= index) && (index < startPosition)) {
-        Object.assign(el.style, active)
-      } else {
-        Object.assign(el.style, inactive)
-      }
-    })
-    numberCurrentList--
-  }
-})
-
-const addData = (data) => {
-  currentData = data
-  const deleteElements = document.querySelectorAll(`.${list}`);
-  deleteElements.forEach(deleteElement => {deleteElement.remove()})
-  const listBlock = document.createElement('div')
-  listBlock.classList.add(list)
-  document.querySelector(`.${wrapper}`).append(listBlock)
-  data.forEach((el, index) => {
-    const item = new Item()
-    item.init(el, index)
-  });
 }
-
-const handleGetData = async(url) => {
-    try {
-        const res = await fetch(url)
-        const json = await res.json()
-        addData([...json.products])
-        console.log(json.products);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-handleGetData('https://dummyjson.com/products')
-
-
-
-
-
-
-
 
 
 
@@ -480,14 +686,6 @@ handleGetData('https://dummyjson.com/products')
  
 
   
-
-
-
-
-  
-
-
-
 
 
 
