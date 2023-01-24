@@ -10,6 +10,17 @@
     --background-active: #d8a470;
     --background-popup: #eceaea;
     --btn-inactive: #807f7f;
+
+
+
+
+
+
+    --color-black: #000;
+    --color-white: #fff;
+    --gray-1: rgb(186, 186, 186);
+    --height-1: 30px;
+    --border-gray: 1px solid rgb(186, 186, 186);
 }
 
 .wrapper {
@@ -66,25 +77,8 @@
     border: var(--border);
 }
 
-.js-select{
-    height: 30px;
-    width: 150px;
-    font-size: 18px;
-    outline-style: none;
-    border: var(--border);
-    text-align: center;
-    color: var(--white);
-    background: #807f7f;
-    cursor: pointer;
-}
-
-.js-option {
-    color: var(--white);
-    font-size: 16px;
-}
-
 .js-list{
-    margin-bottom: 400px;
+    margin-bottom: 450px;
 }
 
 .js-zone {
@@ -230,3 +224,108 @@ strong{
     z-index: auto;
     transform: none;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.js-select{
+    width: 150px;
+    font-size: 20px;
+    border: var(--border);
+    color: var(--white);
+    background: #807f7f;
+
+
+    height: 35px;
+    border: var(--border-gray);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.js-drop{
+    outline-style: none;
+    cursor: pointer;
+    text-align: center;
+    cursor: pointer;
+}
+
+.js-dropdown{
+    float: left;
+    position: relative;
+    display:inline-block ;
+}
+   
+.js-dropdown__list{
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 35px;
+    margin: 0;
+    padding: 0;
+    background: var(--color-white);
+    overflow: hidden;
+    width: 100%;
+    z-index: 1;
+}
+   
+.js-dropdown__list-visible{
+    display: block;
+}
+   
+.js-dropdown__item{
+    margin: 0;
+    border: var(--border-gray);
+    height: 35px;
+    border-bottom: 0;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+   
+.js-dropdown__item:first-child{
+    border-top: 0;
+}
+
+.js-dropdown__item:last-child{
+    border-bottom: var(--border-gray);
+}
+   
+.js-dropdown__item:hover{
+    background: var(--gray-1);
+} 
+   
+.js-drop::after{
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-width: 10px 4px 0 4px;
+    border-color: var(--gray-1) transparent transparent transparent;
+    border-style: solid;
+    pointer-events: none;
+}
+   
+
+     
+
+
+
+
+

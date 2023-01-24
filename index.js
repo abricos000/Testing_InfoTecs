@@ -39,7 +39,7 @@ const itemActiveClass = "js-item-active";
 
 const JsonPlaceholder = "https://dummyjson.com/products";
 
-const select = [
+const selectttttt = [
   {value: "category", text: "category"},
   {value: "title", text: "title"},
   {value: "price", text: "price"},
@@ -47,6 +47,153 @@ const select = [
 ];
 
 let currentData = null;
+
+
+
+
+
+
+  const listVisible = 'js-dropdown__list-visible'
+  const selectorDrop = '.js-drop'
+  const selectorDropDownList = '.js-dropdown__list'
+  const selectorDropDownListItem = '.js-dropdown__item'
+  
+  
+  
+    
+  
+  /**
+   * Класс для создания выпадающих списков 
+   */
+  class Select {
+    /**
+    *  конструктор класса для создания выпадающего списка
+    * @constructor
+    * @param {object} array массив объектов с элементами выпадающего списка
+    */
+    constructor(array, domElement) {
+        try {
+
+            if (!Array.isArray(array)) { // проверка параметра на массив
+                throw Error('аргумент ' + array + ' не является массивом')
+            }
+
+            if (!(domElement instanceof Element)) {// проверка параметра на DOM элемент
+              throw Error(domElement + ' не является DOM элементом')
+            }
+
+            this.array = array 
+            this. domElement = domElement
+     
+            this.init() 
+        } catch (err) {
+            console.error(err)          
+        }       
+    }
+  
+    /**
+    * метод инициализации компонента
+    * @param {element} domElement Dom элемент для инициализации
+    */
+    init(){ 
+      try {
+
+        let clone = this. domElement.cloneNode(true);// создаю клон DOM элемента
+        clone.classList.add('js-drop')// добавляю клону класс drop, чтобы можно было добавлять текст из элементов списка
+        let divWrapper = document.createElement('div');// создаю див обвёрту для клона
+        divWrapper.className = "js-dropdown " // присваиваю обёртке класс dropdown , для того чтобы можно было отслеживать все выпадающие списки
+        divWrapper.className += this. domElement.classList + '-wrapper' // присваиваю обёртке еще один класс, индивидуальный, 
+        // для того чтобы можно было позиционировать весь элемент на странице
+        this. domElement.after(divWrapper)// добавляю после самого параметра элемента DOM обвёртку
+        divWrapper.appendChild(clone)// добавляю внутрь обвёртки клонированный DOM элемент
+        this. domElement.remove()// удаляю параметр
+
+        const dropdownListElement = document.createElement('div'); 
+        dropdownListElement.classList.add('js-dropdown__list');
+        divWrapper.append(dropdownListElement);
+
+        this.array.forEach((el) => {
+
+          const dropdownItemElement = document.createElement('div')
+          dropdownItemElement.classList.add('js-dropdown__item')
+          dropdownItemElement.dataset.value = el.value
+          dropdownItemElement.textContent = el.text
+          dropdownListElement.append(dropdownItemElement)
+        })
+
+        this._initHandlers(divWrapper)
+        
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  
+    /**
+    * Метод обработки инициализации
+    * @param {element} dropDownWrapper DOM элемент
+    */
+    _initHandlers(dropDownWrapper) {
+               
+        const drop = dropDownWrapper.querySelector(selectorDrop)
+        const dropDownList = dropDownWrapper.querySelector(selectorDropDownList)
+        const dropDownListItems = dropDownList.querySelectorAll(selectorDropDownListItem)
+        
+        dropDownWrapper.addEventListener('click', () => {
+            this._switchSpisok(dropDownList, listVisible)
+        })
+     
+        dropDownListItems.forEach( (listItem) => { 
+            listItem.addEventListener('click', () => {
+                this._addTextInDomElement(drop, listItem)
+                this._removeDropDownList(dropDownList, listVisible)
+            })
+        })
+        
+        document.addEventListener('click', (e) => { 
+            if (e.target !== drop) {
+                this._removeDropDownList(dropDownList, listVisible)
+            } 
+        })
+        
+        document.addEventListener('keydown', () => {  
+            this._removeDropDownList(dropDownList, listVisible)
+        })
+    }
+  
+    /**
+    * Метод переключения выпадающего списка
+    * @param {element} dropDownList DOM элемент в котором необходимо добавлять/удалять селектор 
+    * @param {string} listVisible название класса, который необходимо добавлять/удалять
+    */
+    _switchSpisok(dropDownList, listVisible) {
+        dropDownList.classList.toggle(listVisible)
+    }
+  
+    /**
+    * Метод добавления текста в DOM элемент
+    * @param {element} drop DOM элемент в который необходимо добавлять текст
+    * @param {element} listItem DOM элемент из которого необходимо взять текст
+    */
+    _addTextInDomElement(drop, listItem) {
+      drop.innerText = listItem.innerText
+      drop.dataset.value = listItem.dataset.value
+    }
+  
+    /**
+    * Метод скрытия выпадающего списка
+    * @param {element} dropDownList DOM элемент в котором необходимо удалить селектор 
+    * @param {string} listVisible название селектора, который необходимо удалить
+    */
+    _removeDropDownList(dropDownList, listVisible) {
+        dropDownList.classList.remove(listVisible)
+    } 
+  }
+
+
+
+
+
+
 
 
 /**
@@ -59,6 +206,7 @@ class Page {
    * @constructor 
    */
   constructor() {
+
     this.count = 10;
     this.numberCurrentList = 0;
     this.items = [];
@@ -81,20 +229,10 @@ class Page {
     inputElement.value = this.count;
     wrapperSelectInputElement.append(inputElement);
 
-    const selectElement = document.createElement('select');
+    const selectElement = document.createElement('div');
     selectElement.className = selectClass;
     wrapperSelectInputElement.append(selectElement);
-
-    const optionDefaultElement = document.createElement('option');
-    selectElement.append(optionDefaultElement);
-
-    select.forEach(el => {
-      const optionElement = document.createElement('option');
-      optionElement.className = optionClass;
-      optionElement.value = el.value;
-      optionElement.textContent = el.text;
-      selectElement.append(optionElement);
-    })
+    this._initSelect(selectElement)
 
     const btnsWrapperElement = document.createElement('div');
     btnsWrapperElement.className = wrapperBtnsClass;
@@ -111,19 +249,26 @@ class Page {
     btnNextElement.textContent = 'next';
     btnsWrapperElement.append(btnNextElement);
 
-    this._initListeners(btnPrevElement, btnNextElement, inputElement, selectElement);
+    this._initListeners(btnPrevElement, btnNextElement, inputElement);
   }
+
+_initSelect = (selectElement) => {
+  new Select(selectttttt, selectElement) 
+}
 
   /**
    * метод добавления обработчиков событий 
    * @param {HTMLElement} btnPrevElement - кнопка Prev
    * @param {HTMLElement} btnNextElement - кнопка Next
    * @param {HTMLElement} inputElement - поле для ввода количесва выводимых элементов списка
-   * @param {HTMLElement} selectElement - селект для сортировки массива
    */  
-  _initListeners = (btnPrevElement, btnNextElement, inputElement, selectElement) => {
+  _initListeners = (btnPrevElement, btnNextElement, inputElement) => {
+
+    const selectElement = document.querySelector('.js-select')
+
 
     btnNextElement.addEventListener('click', () => {
+
       const coutList= Math.ceil(currentData?.length/this.count); 
       btnPrevElement.classList.remove(inactiveBtnClass);
 
@@ -183,25 +328,29 @@ class Page {
       };
     });
 
-    selectElement.addEventListener('click', (event) => {
-      const newPosts = [...currentData]; 
+    document.querySelectorAll('.js-dropdown__item').forEach(option => {
+      option.addEventListener('click', () => {
+        const newPosts = [...currentData]; 
 
-      if (typeof newPosts[0][`${event.target.value}`] === 'string') {
-        newPosts.sort((a, b) => (a[event.target.value]).localeCompare(b[event.target.value]));
-      }     
+        if (typeof newPosts[0][`${selectElement.dataset.value}`] === 'string') {
+          newPosts.sort((a, b) => (a[selectElement.dataset.value]).localeCompare(b[selectElement.dataset.value]));
+        }     
+  
+        if (typeof newPosts[0][`${selectElement.dataset.value}`] === 'number') {
+          newPosts.sort((a, b) => {
 
-      if (typeof newPosts[0][`${event.target.value}`] === 'number') {
-        newPosts.sort((a, b) => {
-          if (a[event.target.value] > b[event.target.value]) {
-            return -1;
-          } else {
-            return b[event.target.value] > a[event.target.value] ? 1 : 0;
-          };
-        });
-      };
-      currentData = newPosts;
-      const currentListElement = currentData.slice(0, this.count);
-      this._addData(currentListElement);
+            if (a[selectElement.dataset.value] > b[selectElement.dataset.value]) {
+              return -1;
+            } else {
+              return b[selectElement.dataset.value] > a[selectElement.dataset.value] ? 1 : 0;
+            };
+          });
+        };
+
+        currentData = newPosts;
+        const currentListElement = currentData.slice(0, this.count);
+        this._addData(currentListElement);
+      })
     })
   };
 
@@ -210,16 +359,9 @@ class Page {
    * @param {object[]} data - массив текущий объктов которые будут преобразоваться в html элементы
    */
   _addData = (data) => {
-    // по всем зонам нужно проходить и удалять каждую. Метод внутри зоны должен удалять себя же и обработчики которые были созданы
-    const deleteElements = document.querySelectorAll(zoneSelector);
-    deleteElements.forEach(deleteElement => {
-      deleteElement.remove();
-    });
-    // this.items = [];
-    // const listElement = document.createElement('div')
-    // listElement.classList.add(listClass)
-    // document.querySelector(wrapperSelector).append(listElement)
-
+    this.items.forEach(el => {
+      el._remove()
+    })
 
     if (this.count >= currentData.length) {
       document.querySelector(wrapperBtnsSelector).style.opacity = '0';
@@ -228,10 +370,11 @@ class Page {
       document.querySelector(wrapperBtnsSelector).style.opacity = '1';
       document.querySelector(wrapperBtnsSelector).style.cursor = 'pointer';
     };
-
+    
     data.forEach(el => {
-      this.items.push(new Item(el, this.count, this.firstIndexCurrentList, currentData));
+      this.items.push(new Item(el, this.count, this.firstIndexCurrentList));
     });
+
   };
 
   /**
@@ -263,7 +406,16 @@ class Page {
   };
 };
 
-new Page();
+ new Page();
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -321,7 +473,9 @@ class Item {
     try{
       const zoneElement = document.createElement('div');
       zoneElement.classList.add(zoneClass);
-      zoneElement.id = this.itemData.id;
+      zoneElement.dataset.id = this.itemData.id;
+
+
       this.element = zoneElement;
 
       const wrapperItemElement = document.createElement('div');
@@ -406,10 +560,11 @@ class Item {
    *  метод метод изменения массива после drag and drop
    */ 
   _changeCurrentArray = () => {
+
     const zoneElements = Object.values(document.querySelectorAll(zoneSelector));
-    const indexElement = zoneElements.findIndex(el => el.id === this.movingElement.id);
-    const curentElement = currentData.find(el => el.id == this.movingElement.id);
-    const newArray = currentData.filter(item => !(item.id == this.movingElement.id));
+    const indexElement = zoneElements.findIndex(el => el.dataset.id === this.movingElement.dataset.id);
+    const curentElement = currentData.find(el => el.id == this.movingElement.dataset.id);
+    const newArray = currentData.filter(item => !(item.id == this.movingElement.dataset.id));
     const indexNewPosition = this.firstIndexCurrentList + indexElement;
 
     const newArr = newArray.reduce((pref, el, index) => {
@@ -417,9 +572,9 @@ class Item {
       if( index === indexNewPosition) {
           pref.push(curentElement);
         }
-        pref.push(el);
+      pref.push(el);
       return pref;
-    }, []);
+      }, []);
 
     if( newArray.length === indexNewPosition ) {
       newArr.push(curentElement);
@@ -432,6 +587,7 @@ class Item {
    *  метод срабатывающий при mouse up
    */ 
   _onMouseUp = () => {//срабатыввет когда отпускаю мышь
+
     
     if (!this.isDraggingStarted) {
       document.removeEventListener("mousemove", this._onMouseMove);
@@ -582,7 +738,6 @@ class Item {
    */ 
   _removeListeners() {
     document.removeEventListener("mousemove", this._onMouseMove);
-    this.movingElement.removeEventListener('mouseup', this._onMouseUp);
     this.element.removeEventListener('mouseover', this._onMouseOver);
     this.element.removeEventListener('mouseout', this._onMouseOut);
     this.element.removeEventListener('mousedown', this._onMouseDown);
@@ -677,6 +832,9 @@ class Popup {
     return popupElement;
   }
 }
+
+
+
 
 
 
