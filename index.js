@@ -26,9 +26,9 @@ const wrapperBtnsSelector = `.${wrapperBtnsClass}`;
 const prevListClass = "js-prev-list";
 const prevNextClass = "js-next-list";
 const inactiveBtnClass = "js-inactive-button";
-const optionClass = "js-option";
 const wrapperSelectInputClass = "js-wrapper-select-input";
 const selectClass = "js-select";
+const selectSelector = ".js-select";
 const inputClass = "js-input";
 
 const emptySectionHiddenLessonClass = "js-empty-section-hidden-lesson";
@@ -36,10 +36,19 @@ const emptySectionHiddenLessonSelector = `.${emptySectionHiddenLessonClass}`;
 const placeholderClass = "js-placeholder";
 const pointerEventsClass = "js-pointer-events";
 const itemActiveClass = "js-item-active";
+const btnsPaginationInvisibleClass = "js-btns-pagination-invisible";
+
+const dropdownListVisibleClass  = 'js-dropdown-list-visible';
+const valueSelectClass = 'js-drop';
+const valueSelectSelector = `.${valueSelectClass}`;
+const dropDownListClass = 'js-dropdown-list';
+const dropDownListSelector = `.${dropDownListClass}`;
+const dropDownListItemClass = 'js-dropdown-item';
+const dropDownListItemSelector = `.${dropDownListItemClass}`;
 
 const JsonPlaceholder = "https://dummyjson.com/products";
 
-const selectttttt = [
+const optionsSelect = [
   {value: "category", text: "category"},
   {value: "title", text: "title"},
   {value: "price", text: "price"},
@@ -47,21 +56,8 @@ const selectttttt = [
 ];
 
 let currentData = null;
-
-
-
-
-
-
-  const listVisible = 'js-dropdown__list-visible'
-  const selectorDrop = '.js-drop'
-  const selectorDropDownList = '.js-dropdown__list'
-  const selectorDropDownListItem = '.js-dropdown__item'
-  
-  
   
     
-  
   /**
    * Класс для создания выпадающих списков 
    */
@@ -69,353 +65,213 @@ let currentData = null;
     /**
     *  конструктор класса для создания выпадающего списка
     * @constructor
-    * @param {object} array массив объектов с элементами выпадающего списка
+    * @param {object} array массив для элементов выпадающего списка
+    * @param {Element} domElement DOM елемент в котором будет создан выпадающий список
     */
-    constructor(array, domElement) {
+    constructor(options, domElement) {
         try {
 
-            if (!Array.isArray(array)) { // проверка параметра на массив
-                throw Error('аргумент ' + array + ' не является массивом')
+            if (!Array.isArray(options)) { 
+                throw Error('аргумент ' + options + ' не является массивом');
+            };
+
+            if (!(domElement instanceof Element)) {
+              throw Error(domElement + ' не является DOM элементом');
             }
 
-            if (!(domElement instanceof Element)) {// проверка параметра на DOM элемент
-              throw Error(domElement + ' не является DOM элементом')
-            }
-
-            this.array = array 
-            this. domElement = domElement
+            this.array = options;
+            this.domElement = domElement;
      
-            this.init() 
+            this.init();
         } catch (err) {
-            console.error(err)          
+            console.error(err);      
         }       
-    }
+    };
   
     /**
-    * метод инициализации компонента
-    * @param {element} domElement Dom элемент для инициализации
+    * Метод иницианализации селектора
     */
     init(){ 
       try {
 
-        let clone = this. domElement.cloneNode(true);// создаю клон DOM элемента
-        clone.classList.add('js-drop')// добавляю клону класс drop, чтобы можно было добавлять текст из элементов списка
-        let divWrapper = document.createElement('div');// создаю див обвёрту для клона
-        divWrapper.className = "js-dropdown " // присваиваю обёртке класс dropdown , для того чтобы можно было отслеживать все выпадающие списки
-        divWrapper.className += this. domElement.classList + '-wrapper' // присваиваю обёртке еще один класс, индивидуальный, 
-        // для того чтобы можно было позиционировать весь элемент на странице
-        this. domElement.after(divWrapper)// добавляю после самого параметра элемента DOM обвёртку
-        divWrapper.appendChild(clone)// добавляю внутрь обвёртки клонированный DOM элемент
-        this. domElement.remove()// удаляю параметр
+        const valueSelectElement = document.createElement('div');
+        valueSelectElement.classList.add(valueSelectClass);
 
         const dropdownListElement = document.createElement('div'); 
-        dropdownListElement.classList.add('js-dropdown__list');
-        divWrapper.append(dropdownListElement);
+        dropdownListElement.classList.add(dropDownListClass);
+        this.domElement.append(dropdownListElement);
 
-        this.array.forEach((el) => {
+        this.array.forEach((option) => {
 
-          const dropdownItemElement = document.createElement('div')
-          dropdownItemElement.classList.add('js-dropdown__item')
-          dropdownItemElement.dataset.value = el.value
-          dropdownItemElement.textContent = el.text
-          dropdownListElement.append(dropdownItemElement)
+          const dropdownItemElement = document.createElement('div');
+          dropdownItemElement.classList.add(dropDownListItemClass);
+          dropdownItemElement.dataset.value = option.value;
+          dropdownItemElement.textContent = option.text;
+          dropdownListElement.append(dropdownItemElement);
         })
 
-        this._initHandlers(divWrapper)
-        
+        this.domElement.append(valueSelectElement);
+        this._initHandlers(this.domElement);
       } catch (error) {
         console.log(error);
       }
     }
   
     /**
-    * Метод обработки инициализации
+    * Метод навешивания событий
     * @param {element} dropDownWrapper DOM элемент
     */
     _initHandlers(dropDownWrapper) {
                
-        const drop = dropDownWrapper.querySelector(selectorDrop)
-        const dropDownList = dropDownWrapper.querySelector(selectorDropDownList)
-        const dropDownListItems = dropDownList.querySelectorAll(selectorDropDownListItem)
+        const drop = dropDownWrapper.querySelector(valueSelectSelector);
+        const dropDownList = dropDownWrapper.querySelector(dropDownListSelector);
+        const dropDownListItems = dropDownList.querySelectorAll(dropDownListItemSelector);
         
         dropDownWrapper.addEventListener('click', () => {
-            this._switchSpisok(dropDownList, listVisible)
-        })
+            this._switchSpisok(dropDownList, dropdownListVisibleClass);
+        });
      
         dropDownListItems.forEach( (listItem) => { 
             listItem.addEventListener('click', () => {
-                this._addTextInDomElement(drop, listItem)
-                this._removeDropDownList(dropDownList, listVisible)
+                this._addTextInDomElement(drop, listItem, dropDownWrapper);
+                this._removeDropDownList(dropDownList, dropdownListVisibleClass);
             })
-        })
+        });
         
-        document.addEventListener('click', (e) => { 
-            if (e.target !== drop) {
-                this._removeDropDownList(dropDownList, listVisible)
-            } 
-        })
+        document.addEventListener('click', (event) => { 
+
+            if (event.target !== drop) {
+                this._removeDropDownList(dropDownList, dropdownListVisibleClass);
+            };
+        });
         
         document.addEventListener('keydown', () => {  
-            this._removeDropDownList(dropDownList, listVisible)
-        })
-    }
+            this._removeDropDownList(dropDownList, dropdownListVisibleClass);
+        });
+    };
   
     /**
     * Метод переключения выпадающего списка
-    * @param {element} dropDownList DOM элемент в котором необходимо добавлять/удалять селектор 
-    * @param {string} listVisible название класса, который необходимо добавлять/удалять
+    * @param {element} dropDownList DOM элемент в котором необходимо показывать/скрывать список 
+    * @param {string} dropdownListVisibleClass класса, который необходимо добавлять/удалять
     */
-    _switchSpisok(dropDownList, listVisible) {
-        dropDownList.classList.toggle(listVisible)
-    }
+    _switchSpisok(dropDownList, dropdownListVisibleClass) {
+      dropDownList.classList.toggle(dropdownListVisibleClass);
+    };
   
     /**
     * Метод добавления текста в DOM элемент
     * @param {element} drop DOM элемент в который необходимо добавлять текст
     * @param {element} listItem DOM элемент из которого необходимо взять текст
+    * @param {element} dropDownWrapper DOM элемент в который добавляется значение выбранного поля
     */
-    _addTextInDomElement(drop, listItem) {
-      drop.innerText = listItem.innerText
-      drop.dataset.value = listItem.dataset.value
-    }
+    _addTextInDomElement(drop, listItem, dropDownWrapper) {
+      drop.textContent = listItem.innerText;
+      dropDownWrapper.dataset.value = listItem.dataset.value;
+    };
   
     /**
     * Метод скрытия выпадающего списка
     * @param {element} dropDownList DOM элемент в котором необходимо удалить селектор 
-    * @param {string} listVisible название селектора, который необходимо удалить
+    * @param {string} dropdownListVisibleClass название селектора, который необходимо удалить
     */
-    _removeDropDownList(dropDownList, listVisible) {
-        dropDownList.classList.remove(listVisible)
-    } 
-  }
-
-
-
-
-
-
+    _removeDropDownList(dropDownList, dropdownListVisibleClass) {
+        dropDownList.classList.remove(dropdownListVisibleClass);
+    };
+  };  
 
 
 /**
- * класс для инициализации всей страницы
- */
-class Page {
+ * Класс для создания всплывающей панели элемента спискa 
+ */ 
+class Popup {
 
   /**
-   * конструктор класса Page
-   * @constructor 
+   * конструктор класса для создания всплывающей панели элемента спискa 
+   * @constructor
+   * @param {object} itemData Объект 
    */
-  constructor() {
+  constructor (itemData) {
 
-    this.count = 10;
-    this.numberCurrentList = 0;
-    this.items = [];
-    this.firstIndexCurrentList = 0
-
-    this._handleGetData(JsonPlaceholder)
-    this._init()
-  }
-
-  /**
-   * метод инициализации страницы 
-   */  
-  _init = () => {
-    const wrapperSelectInputElement = document.createElement('div');
-    wrapperSelectInputElement.className = wrapperSelectInputClass;
-    document.querySelector(wrapperSelector).append(wrapperSelectInputElement);
-
-    const inputElement = document.createElement('input');
-    inputElement.className = inputClass;
-    inputElement.value = this.count;
-    wrapperSelectInputElement.append(inputElement);
-
-    const selectElement = document.createElement('div');
-    selectElement.className = selectClass;
-    wrapperSelectInputElement.append(selectElement);
-    this._initSelect(selectElement)
-
-    const btnsWrapperElement = document.createElement('div');
-    btnsWrapperElement.className = wrapperBtnsClass;
-    document.querySelector(wrapperSelector).append(btnsWrapperElement);
-  
-    const btnPrevElement = document.createElement('button');
-    btnPrevElement.className = prevListClass;
-    btnPrevElement.classList.add(inactiveBtnClass);
-    btnPrevElement.textContent = 'prev';
-    btnsWrapperElement.append(btnPrevElement);
-  
-    const btnNextElement = document.createElement('button');
-    btnNextElement.className = prevNextClass;
-    btnNextElement.textContent = 'next';
-    btnsWrapperElement.append(btnNextElement);
-
-    this._initListeners(btnPrevElement, btnNextElement, inputElement);
-  }
-
-_initSelect = (selectElement) => {
-  new Select(selectttttt, selectElement) 
-}
-
-  /**
-   * метод добавления обработчиков событий 
-   * @param {HTMLElement} btnPrevElement - кнопка Prev
-   * @param {HTMLElement} btnNextElement - кнопка Next
-   * @param {HTMLElement} inputElement - поле для ввода количесва выводимых элементов списка
-   */  
-  _initListeners = (btnPrevElement, btnNextElement, inputElement) => {
-
-    const selectElement = document.querySelector('.js-select')
-
-
-    btnNextElement.addEventListener('click', () => {
-
-      const coutList= Math.ceil(currentData?.length/this.count); 
-      btnPrevElement.classList.remove(inactiveBtnClass);
-
-      if (coutList - 1 > this.numberCurrentList) {
-        ++this.numberCurrentList;
-        this.firstIndexCurrentList = this.count * this.numberCurrentList;
-        let endPosition = this.firstIndexCurrentList + this.count;
-        const currentListElement = currentData.slice(this.firstIndexCurrentList, endPosition);
-        this._addData(currentListElement);
-      };
-
-      if (this.numberCurrentList === coutList - 1 ) {
-        btnNextElement.classList.add(inactiveBtnClass);
-      };
-    })
-
-    btnPrevElement.addEventListener('click', () => {
-      btnNextElement.classList.remove(inactiveBtnClass);
-
-      if (!(this.numberCurrentList-1)) {
-        btnPrevElement.classList.add(inactiveBtnClass);
-      };
-
-      if (this.numberCurrentList) {
-        let endPosition = this.count * this.numberCurrentList;
-        this.firstIndexCurrentList = endPosition - this.count;
-        const currentListElement = currentData.slice(this.firstIndexCurrentList, endPosition);
-        this._addData(currentListElement);
-        this.numberCurrentList--;
-      };
-    });
-
-    inputElement.addEventListener('blur', () => {
-      const num = Number(inputElement.value);
-
-      if (Number.isInteger(num) && num > 0) {
-        this.count = num;
-        const currentListElement = currentData.slice(0, this.count);
-        this._addData(currentListElement);
-      } else {
-        inputElement.value = this.count;
-      };
-    });
-
-    inputElement.addEventListener('keydown', (event) => {
-
-      if (event.key === 'Enter') {
-        const num = Number(inputElement.value);
-
-        if (Number.isInteger(num) && num > 0) {
-          this.count = num;
-          const currentListElement = currentData.slice(0, this.count);
-          this._addData(currentListElement);
-        } else {
-          inputElement.value = this.count;
-        };
-      };
-    });
-
-    document.querySelectorAll('.js-dropdown__item').forEach(option => {
-      option.addEventListener('click', () => {
-        const newPosts = [...currentData]; 
-
-        if (typeof newPosts[0][`${selectElement.dataset.value}`] === 'string') {
-          newPosts.sort((a, b) => (a[selectElement.dataset.value]).localeCompare(b[selectElement.dataset.value]));
-        }     
-  
-        if (typeof newPosts[0][`${selectElement.dataset.value}`] === 'number') {
-          newPosts.sort((a, b) => {
-
-            if (a[selectElement.dataset.value] > b[selectElement.dataset.value]) {
-              return -1;
-            } else {
-              return b[selectElement.dataset.value] > a[selectElement.dataset.value] ? 1 : 0;
-            };
-          });
-        };
-
-        currentData = newPosts;
-        const currentListElement = currentData.slice(0, this.count);
-        this._addData(currentListElement);
-      })
-    })
-  };
-
-  /**
-   * метод создания элементов списка 
-   * @param {object[]} data - массив текущий объктов которые будут преобразоваться в html элементы
-   */
-  _addData = (data) => {
-    this.items.forEach(el => {
-      el._remove()
-    })
-
-    if (this.count >= currentData.length) {
-      document.querySelector(wrapperBtnsSelector).style.opacity = '0';
-      document.querySelector(wrapperBtnsSelector).style.cursor = 'none';
-    } else {
-      document.querySelector(wrapperBtnsSelector).style.opacity = '1';
-      document.querySelector(wrapperBtnsSelector).style.cursor = 'pointer';
-    };
-    
-    data.forEach(el => {
-      this.items.push(new Item(el, this.count, this.firstIndexCurrentList));
-    });
-
-  };
-
-  /**
-   * метод создания списка 
-   * @param {object[]} responseJSON - ответ с сервера
-   */
-  _addDataAll = (responseJSON) => {
-    currentData = [...responseJSON];
-    const listElement = document.createElement('div');
-    listElement.classList.add(listClass);
-    document.querySelector(wrapperSelector).append(listElement);
-
-    const currentListElement = currentData.slice(0, this.count);
-    this._addData(currentListElement);
-  };
-
-  /**
-   * асинхронный метод обрабатывающий ответ с сервера
-   * @param {string} url - ссылка
-   */
-  _handleGetData = async(url) => {
     try {
-        const res = await fetch(url);
-        const responseJSON = await res.json();
-        this._addDataAll(responseJSON.products);
+      this.itemData = itemData;
     } catch (error) {
-        console.log(error);
+      console.log(error);
     };
   };
+
+/**
+ * метод инициализации всплывающей панели 
+ * @returns {HTMLElement}  
+ */ 
+  _init = () => {
+    const popupElement = document.createElement('div');
+    popupElement.classList.add(panelPopupClass);
+
+    const headerElement = document.createElement('div');
+    headerElement.classList.add(panelHeaderClass);
+    popupElement.append(headerElement);
+
+    const titleElement = document.createElement('div');
+    titleElement.classList.add(panelTitleClass);
+    titleElement.textContent = this.itemData.title;
+    headerElement.append(titleElement);
+
+    const ratingElement = document.createElement('div');
+    ratingElement.classList.add(panelRatingClass);
+    ratingElement.innerHTML = `rating: <strong>${this.itemData.rating}</strong> / 5 &#10026;`;
+    headerElement.append(ratingElement);
+
+    const mainElement = document.createElement('div');
+    mainElement.classList.add(panelMainClass);
+    popupElement.append(mainElement);
+
+    const infoElement = document.createElement('div');
+    infoElement.classList.add(panelInfoClass);
+    mainElement.append(infoElement);
+
+    const discountPercentageElement = document.createElement('div');
+    discountPercentageElement.classList.add(panelDiscountPercentageClass);
+
+    discountPercentageElement.innerHTML = 
+      `discount: <strong>
+        ${this.itemData.discountPercentage}&#37;
+      </strong>`;
+
+    infoElement.append(discountPercentageElement);
+
+    const priceElement = document.createElement('div');
+    priceElement.classList.add(panelDiscountPercentageClass);
+    priceElement.innerHTML = `price: <strong>${this.itemData.price} &#36;</strong>`;
+    infoElement.append(priceElement);
+
+    const brandElement = document.createElement('div');
+    brandElement.classList.add(panelBrandClass);
+    brandElement.innerHTML = `brand: <strong>${this.itemData.brand}</strong>`;
+    infoElement.append(brandElement);
+
+    const categoryElement = document.createElement('div');
+    categoryElement.classList.add(panelCategpryClass);
+    categoryElement.innerHTML = `category: <strong>${this.itemData.category}</strong>`;
+    infoElement.append(categoryElement);
+
+    const descriptionElement = document.createElement('div');
+    descriptionElement.classList.add(panelDescriptionClass);
+    descriptionElement.textContent = this.itemData.description;
+    infoElement.append(descriptionElement);
+
+    const slideElement = document.createElement('div');
+    slideElement.classList.add(panelSlideClass);
+    mainElement.append(slideElement);
+
+    const imageElement = document.createElement('img');
+    imageElement.classList.add(panelImgClass);
+    imageElement.src = this.itemData.thumbnail;
+    slideElement.append(imageElement);
+
+    return popupElement;
+  }
 };
-
- new Page();
-
-
-
-
-
-
-
-
-
 
 
 /**
@@ -430,42 +286,46 @@ class Item {
    * @param {number} firstIndexCurrentList - порядковый номер первого елемента текущего массива из общих данных
    */
   constructor (itemData, numberCurrentList, firstIndexCurrentList) {
-
-    this.firstIndexCurrentList = firstIndexCurrentList;
-    this.statusPopup = false;
-    this.numberCurrentList = numberCurrentList;
-    this.itemData = itemData;
-    this.isDraggingStarted = false;
-    this.currentDroppable = null;
-    this.placeholder = null;
-    this.movingElement = null;
-    this.elementBelow = null;
-    this.element = null;
-    this.item =null;
-    this.wrapperPopupElement = null;
-
-    this.shifts = {
-      shiftX: 0,
-      shiftY: 0,
-      set (clientX, clientY, movingElement) {
-        const rect = movingElement.getBoundingClientRect();
-        this.shiftX = clientX - rect.left;
-        this.shiftY = clientY - rect.top;
-      },
+    try {
+      this.firstIndexCurrentList = firstIndexCurrentList;
+      this.statusPopup = false;
+      this.numberCurrentList = numberCurrentList;
+      this.itemData = itemData;
+      this.isDraggingStarted = false;
+      this.currentDroppable = null;
+      this.placeholder = null;
+      this.movingElement = null;
+      this.elementBelow = null;
+      this.element = null;
+      this.item =null;
+      this.wrapperPopupElement = null;
+  
+      this.shifts = {
+        shiftX: 0,
+        shiftY: 0,
+        set (clientX, clientY, movingElement) {
+          const rect = movingElement.getBoundingClientRect();
+          this.shiftX = clientX - rect.left;
+          this.shiftY = clientY - rect.top;
+        },
+      };
+  
+      this.initialMovingElementPageXY = {
+        x: 0,
+        y: 0,
+        set (movingElement) {
+          const rect = movingElement.getBoundingClientRect();
+          this.x = rect.x + window.scrollX;
+          this.y = rect.y + window.scrollY;
+        },
+      };
+  
+      this._init();
+    } catch (error) {
+      console.log(error);      
     };
-
-    this.initialMovingElementPageXY = {
-      x: 0,
-      y: 0,
-      set (movingElement) {
-        const rect = movingElement.getBoundingClientRect();
-        this.x = rect.x + window.scrollX;
-        this.y = rect.y + window.scrollY;
-      },
-    };
-
-    this._init();
 }
+
   /**
   * метод инициализации элемента массива
   */
@@ -474,7 +334,6 @@ class Item {
       const zoneElement = document.createElement('div');
       zoneElement.classList.add(zoneClass);
       zoneElement.dataset.id = this.itemData.id;
-
 
       this.element = zoneElement;
 
@@ -508,7 +367,7 @@ class Item {
    * Метод добавления событий на элемент списка
    */
   _initListeners = () => {
-    this.element.addEventListener('mouseover', this._onMouseOver );
+    this.element.addEventListener('mouseover', this._onMouseOver);
     this.element.addEventListener('mouseout', this._onMouseOut);
     this.element.addEventListener('mousedown', this._onMouseDown);
     this.element.addEventListener("mousemove", this._onZoneMouseMove);
@@ -519,7 +378,7 @@ class Item {
    */
   _onZoneMouseMove = () => {
          
-    if (!this.isDraggingStarted && !this.element.querySelector(panelPopupSelector)){
+    if (!this.isDraggingStarted && !this.element.querySelector(panelPopupSelector)) {
       const itemPopup = new Popup(this.itemData);
       this.wrapperPopupElement.append(itemPopup._init());
       this.item.classList.add(itemActiveClass);
@@ -536,7 +395,7 @@ class Item {
     };
     
     this.item.classList.remove(itemActiveClass);
-    this.element.querySelector(wrapperItemSelect).classList?.remove(pointerEventsClass);
+    this.element.querySelector(wrapperItemSelect).classList.remove(pointerEventsClass);/////////////////////////////////////////////
   };
 
   _onMouseOver = () => {
@@ -563,16 +422,17 @@ class Item {
 
     const zoneElements = Object.values(document.querySelectorAll(zoneSelector));
     const indexElement = zoneElements.findIndex(el => el.dataset.id === this.movingElement.dataset.id);
-    const curentElement = currentData.find(el => el.id == this.movingElement.dataset.id);
+    const curentElement = currentData.find(el => el.id == this.movingElement.dataset.id);//////////////////////////////////
     const newArray = currentData.filter(item => !(item.id == this.movingElement.dataset.id));
     const indexNewPosition = this.firstIndexCurrentList + indexElement;
 
-    const newArr = newArray.reduce((pref, el, index) => {
+    const newArr = newArray.reduce((pref, element, index) => {
 
       if( index === indexNewPosition) {
           pref.push(curentElement);
         }
-      pref.push(el);
+
+      pref.push(element);
       return pref;
       }, []);
 
@@ -587,12 +447,12 @@ class Item {
    *  метод срабатывающий при mouse up
    */ 
   _onMouseUp = () => {//срабатыввет когда отпускаю мышь
-
     
     if (!this.isDraggingStarted) {
       document.removeEventListener("mousemove", this._onMouseMove);
       return;
     }
+
     this.placeholder.parentNode.insertBefore(this.movingElement, this.placeholder);
 
     Object.assign(this.movingElement.style, {
@@ -633,7 +493,7 @@ class Item {
     if (!this.isDraggingStarted) {
 
       if (this.movingElement.querySelector(panelPopupSelector)) {
-        this.movingElement.querySelector(panelPopupSelector).remove()
+        this.movingElement.querySelector(panelPopupSelector).remove();
       }
       this.isDraggingStarted = true;
       this._createPlaceholder();
@@ -743,95 +603,221 @@ class Item {
     this.element.removeEventListener('mousedown', this._onMouseDown);
     this.element.removeEventListener("mousemove", this._onZoneMouseMove);
   };
-}
+};
 
 
 /**
- * Класс для создания всплывающей панели элемента спискa 
- */ 
-class Popup {
+ * класс для инициализации всей страницы
+ */
+class Page {
 
   /**
-   * конструктор класса для создания всплывающей панели элемента спискa 
-   * @constructor
-   * @param {object} itemData Объект 
+   * конструктор класса Page
+   * @constructor 
    */
-  constructor (itemData) {
-    this.itemData = itemData;
+  constructor() {
+
+      this.count = 10;
+      this.numberCurrentList = 0;
+      this.items = [];
+      this.firstIndexCurrentList = 0;
+  
+      this._handleGetData(JsonPlaceholder);
+      this._init();
   };
 
-/**
- * метод инициализации всплывающей панели 
- * @returns {HTMLElement}  
- */ 
+  /**
+   * метод инициализации страницы 
+   */  
   _init = () => {
-    const popupElement = document.createElement('div');
-    popupElement.classList.add(panelPopupClass);
+    const wrapperSelectInputElement = document.createElement('div');
+    wrapperSelectInputElement.className = wrapperSelectInputClass;
+    document.querySelector(wrapperSelector).append(wrapperSelectInputElement);
 
-    const headerElement = document.createElement('div');
-    headerElement.classList.add(panelHeaderClass);
-    popupElement.append(headerElement);
+    const inputElement = document.createElement('input');
+    inputElement.className = inputClass;
+    inputElement.value = this.count;
+    wrapperSelectInputElement.append(inputElement);
 
-    const titleElement = document.createElement('div');
-    titleElement.classList.add(panelTitleClass);
-    titleElement.textContent = this.itemData.title;
-    headerElement.append(titleElement);
+    const selectElement = document.createElement('div');
+    selectElement.className = selectClass;
+    wrapperSelectInputElement.append(selectElement);
+    this._initSelect(selectElement)
 
-    const ratingElement = document.createElement('div');
-    ratingElement.classList.add(panelRatingClass);
-    ratingElement.innerHTML = `rating: <strong>${this.itemData.rating}</strong> / 5 &#10026;`;
-    headerElement.append(ratingElement);
+    const btnsWrapperElement = document.createElement('div');
+    btnsWrapperElement.className = wrapperBtnsClass;
+    document.querySelector(wrapperSelector).append(btnsWrapperElement);
+  
+    const btnPrevElement = document.createElement('button');
+    btnPrevElement.className = prevListClass;
+    btnPrevElement.classList.add(inactiveBtnClass);
+    btnPrevElement.textContent = 'prev';
+    btnsWrapperElement.append(btnPrevElement);
+  
+    const btnNextElement = document.createElement('button');
+    btnNextElement.className = prevNextClass;
+    btnNextElement.textContent = 'next';
+    btnsWrapperElement.append(btnNextElement);
 
-    const mainElement = document.createElement('div');
-    mainElement.classList.add(panelMainClass);
-    popupElement.append(mainElement);
-
-    const infoElement = document.createElement('div');
-    infoElement.classList.add(panelInfoClass);
-    mainElement.append(infoElement);
-
-    const discountPercentageElement = document.createElement('div');
-    discountPercentageElement.classList.add(panelDiscountPercentageClass);
-
-    discountPercentageElement.innerHTML = 
-      `discount: <strong>
-        ${this.itemData.discountPercentage}&#37;
-      </strong>`;
-
-    infoElement.append(discountPercentageElement);
-
-    const priceElement = document.createElement('div');
-    priceElement.classList.add(panelDiscountPercentageClass);
-    priceElement.innerHTML = `price: <strong>${this.itemData.price} &#36;</strong>`;
-    infoElement.append(priceElement);
-
-    const brandElement = document.createElement('div');
-    brandElement.classList.add(panelBrandClass);
-    brandElement.innerHTML = `brand: <strong>${this.itemData.brand}</strong>`;
-    infoElement.append(brandElement);
-
-    const categoryElement = document.createElement('div');
-    categoryElement.classList.add(panelCategpryClass);
-    categoryElement.innerHTML = `category: <strong>${this.itemData.category}</strong>`;
-    infoElement.append(categoryElement);
-
-    const descriptionElement = document.createElement('div');
-    descriptionElement.classList.add(panelDescriptionClass);
-    descriptionElement.textContent = this.itemData.description;
-    infoElement.append(descriptionElement);
-
-    const slideElement = document.createElement('div');
-    slideElement.classList.add(panelSlideClass);
-    mainElement.append(slideElement);
-
-    const imageElement = document.createElement('img');
-    imageElement.classList.add(panelImgClass);
-    imageElement.src = this.itemData.thumbnail;
-    slideElement.append(imageElement);
-
-    return popupElement;
+    this._initListeners(btnPrevElement, btnNextElement, inputElement);
   }
-}
+
+  _initSelect = (selectElement) => {
+    new Select(optionsSelect, selectElement);
+  };
+
+  /**
+   * метод добавления обработчиков событий 
+   * @param {HTMLElement} btnPrevElement - кнопка Prev
+   * @param {HTMLElement} btnNextElement - кнопка Next
+   * @param {HTMLElement} inputElement - поле для ввода количесва выводимых элементов списка
+   */  
+  _initListeners = (btnPrevElement, btnNextElement, inputElement) => {
+
+    const selectElement = document.querySelector(selectSelector)
+
+    btnNextElement.addEventListener('click', () => {
+
+      const coutList= Math.ceil(currentData?.length/this.count); 
+      btnPrevElement.classList.remove(inactiveBtnClass);
+
+      if (coutList - 1 > this.numberCurrentList) {
+        ++this.numberCurrentList;
+        this.firstIndexCurrentList = this.count * this.numberCurrentList;
+        let endPosition = this.firstIndexCurrentList + this.count;
+        const currentListElement = currentData.slice(this.firstIndexCurrentList, endPosition);
+        this._addData(currentListElement);
+      };
+
+      if (this.numberCurrentList === coutList - 1 ) {
+        btnNextElement.classList.add(inactiveBtnClass);
+      };
+    })
+
+
+    btnPrevElement.addEventListener('click', () => {
+      btnNextElement.classList.remove(inactiveBtnClass);
+
+      if (!(this.numberCurrentList-1)) {
+        btnPrevElement.classList.add(inactiveBtnClass);
+      };
+
+      if (this.numberCurrentList) {
+        let endPosition = this.count * this.numberCurrentList;
+        this.firstIndexCurrentList = endPosition - this.count;
+        const currentListElement = currentData.slice(this.firstIndexCurrentList, endPosition);
+        this._addData(currentListElement);
+        this.numberCurrentList--;
+      };
+    });
+
+
+    inputElement.addEventListener('blur', () => {
+      const num = Number(inputElement.value);
+
+      if (Number.isInteger(num) && num > 0) {
+        this.count = num;
+        const currentListElement = currentData.slice(0, this.count);
+        this._addData(currentListElement);
+      } else {
+        inputElement.value = this.count;
+      };
+    });
+
+
+    inputElement.addEventListener('keydown', (event) => {
+
+      if (event.key === 'Enter') {
+        const num = Number(inputElement.value);
+
+        if (Number.isInteger(num) && num > 0) {
+          this.count = num;
+          const currentListElement = currentData.slice(0, this.count);
+          this._addData(currentListElement);
+        } else {
+          inputElement.value = this.count;
+        };
+      };
+    });
+
+    document.querySelectorAll(dropDownListItemSelector).forEach(option => {
+      option.addEventListener('click', () => {
+        const newPosts = [...currentData]; 
+
+        if (typeof newPosts[0][`${selectElement.dataset.value}`] === 'string') {
+          newPosts.sort((a, b) => (a[selectElement.dataset.value]).localeCompare(b[selectElement.dataset.value]));
+        }     
+  
+        if (typeof newPosts[0][`${selectElement.dataset.value}`] === 'number') {
+          newPosts.sort((a, b) => {
+
+            if (a[selectElement.dataset.value] > b[selectElement.dataset.value]) {
+              return -1;
+            } else {
+              return b[selectElement.dataset.value] > a[selectElement.dataset.value] ? 1 : 0;
+            };
+          });
+        };
+
+        currentData = newPosts;
+        const currentListElement = currentData.slice(0, this.count);
+        this._addData(currentListElement);
+      })
+    })
+  };
+
+  /**
+   * метод создания элементов списка 
+   * @param {object[]} data - текущий массив объктов, которые будут преобразоваться в html элементы
+   */
+  _addData = (data) => {
+    this.items.forEach(element => {
+      element._remove()
+    })
+
+    if (this.count >= currentData.length) {
+      document.querySelector(wrapperBtnsSelector).classList.add(btnsPaginationInvisibleClass)
+    } else {
+      document.querySelector(wrapperBtnsSelector).classList.remove(btnsPaginationInvisibleClass)
+    };
+    
+    data.forEach(element => {
+      this.items.push(new Item(element, this.count, this.firstIndexCurrentList));
+    });
+
+  };
+
+  /**
+   * метод создания списка 
+   * @param {object[]} responseJSON - ответ с сервера
+   */
+  _addDataAll = (responseJSON) => {
+    currentData = [...responseJSON];
+    const listElement = document.createElement('div');
+    listElement.classList.add(listClass);
+    document.querySelector(wrapperSelector).append(listElement);
+
+    const currentListElement = currentData.slice(0, this.count);
+    this._addData(currentListElement);
+  };
+
+  /**
+   * асинхронный метод обрабатывающий ответ с сервера
+   * @param {string} url - ссылка
+   */
+  _handleGetData = async(url) => {
+    try {
+        const res = await fetch(url);
+        const responseJSON = await res.json();
+        this._addDataAll(responseJSON.products);
+    } catch (error) {
+        console.log(error);
+    };
+  };
+};
+
+
+new Page();
 
 
 
