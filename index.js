@@ -446,7 +446,7 @@ class Item {
   /**
    *  метод срабатывающий при mouse up
    */ 
-  _onMouseUp = () => {//срабатыввет когда отпускаю мышь
+  _onMouseUp = () => {
     
     if (!this.isDraggingStarted) {
       document.removeEventListener("mousemove", this._onMouseMove);
@@ -487,8 +487,7 @@ class Item {
     });
   };
 
-// посмотреть про тротлинг, в последний момент, не забыть
-  _onMouseMove = (event) => {// срабытывает когда идет перетаскивание
+  _onMouseMove = (event) => {
 
     if (!this.isDraggingStarted) {
 
