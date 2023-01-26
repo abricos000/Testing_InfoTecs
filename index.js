@@ -395,7 +395,7 @@ class Item {
     };
     
     this.item.classList.remove(itemActiveClass);
-    this.element.querySelector(wrapperItemSelect).classList.remove(pointerEventsClass);/////////////////////////////////////////////
+    this.element.querySelector(wrapperItemSelect).classList.remove(pointerEventsClass);
   };
 
   _onMouseOver = () => {
@@ -422,7 +422,7 @@ class Item {
 
     const zoneElements = Object.values(document.querySelectorAll(zoneSelector));
     const indexElement = zoneElements.findIndex(el => el.dataset.id === this.movingElement.dataset.id);
-    const curentElement = currentData.find(el => el.id == this.movingElement.dataset.id);//////////////////////////////////
+    const curentElement = currentData.find(el => el.id == this.movingElement.dataset.id);
     const newArray = currentData.filter(item => !(item.id == this.movingElement.dataset.id));
     const indexNewPosition = this.firstIndexCurrentList + indexElement;
 
